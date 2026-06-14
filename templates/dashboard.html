@@ -212,7 +212,11 @@ document.querySelectorAll('.quest-proof-form').forEach(form => {
       const resp = await fetch('/quest/complete/' + qid, { method: 'POST', body: formData });
       const data = await resp.json();
       if (data.success) {
+<<<<<<< HEAD
         status.innerHTML = '<span class="status-success">Skill verified!';
+=======
+        status.innerHTML = '<span class="status-success">Skill verified!</span>';
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
         setTimeout(() => location.reload(), 2000);
       } else {
         status.innerHTML = '<span class="status-error">' + (data.error || 'Submission failed') + '</span>';

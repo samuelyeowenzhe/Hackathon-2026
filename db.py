@@ -23,16 +23,23 @@ def init_db():
         CREATE TABLE IF NOT EXISTS player_profiles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER UNIQUE NOT NULL,
+<<<<<<< HEAD
             level INTEGER DEFAULT 1,
             xp INTEGER DEFAULT 0,
             xp_to_next INTEGER DEFAULT 100,
             hp INTEGER DEFAULT 100,
             max_hp INTEGER DEFAULT 100,
+=======
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
             skills TEXT DEFAULT '[]',
             cv_data TEXT DEFAULT '{}',
             char_class TEXT DEFAULT 'Warrior',
             quests TEXT DEFAULT '[]',
+<<<<<<< HEAD
             title TEXT DEFAULT 'Adventurer',
+=======
+            title TEXT DEFAULT 'Job title',
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
             avatar TEXT DEFAULT '',
             last_login TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
@@ -42,13 +49,17 @@ def init_db():
             title TEXT NOT NULL,
             description TEXT,
             skill_required TEXT,
+<<<<<<< HEAD
             xp_reward INTEGER DEFAULT 50,
             hp_cost INTEGER DEFAULT 10,
             boss_name TEXT DEFAULT 'Unknown',
+=======
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
             start_time TIMESTAMP,
             end_time TIMESTAMP,
             active INTEGER DEFAULT 1
         );
+<<<<<<< HEAD
         CREATE TABLE IF NOT EXISTS bosses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id INTEGER,
@@ -71,6 +82,8 @@ def init_db():
             FOREIGN KEY (player_id) REFERENCES users(id),
             FOREIGN KEY (boss_id) REFERENCES bosses(id)
         );
+=======
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
         CREATE TABLE IF NOT EXISTS friend_requests (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             from_user INTEGER NOT NULL,

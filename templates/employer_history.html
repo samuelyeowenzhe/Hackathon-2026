@@ -21,7 +21,11 @@
             {{ s.action | upper }}
           </span>
         </div>
+<<<<<<< HEAD
         <div class="entry-duration">{{ s.title or 'Adventurer' }}</div>
+=======
+        <div class="entry-duration">{{ s.title or 'Job title' }}</div>
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
         <div class="entry-tags">{% set sk = s.skills | from_json if s.skills else [] %}{% for skill in sk[:6] %}<span class="mini-tag">{{ skill }}</span>{% endfor %}</div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
           <span style="font-size: 11px; color: var(--text-muted);">Swiped: {{ s.created_at[:10] if s.created_at else 'Unknown date' }}</span>

@@ -19,7 +19,11 @@
           </span>
           <!-- Removed Lv.3 Warrior badge -->
         </div>
+<<<<<<< HEAD
         <div class="entry-duration">{{ m.title or 'Adventurer' }}</div>
+=======
+        <div class="entry-duration">{{ m.title or '' }}</div>
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
         <div class="entry-tags">
           {% set sk = m.skills | from_json if m.skills else [] %}
           {% for s in sk[:6] %}

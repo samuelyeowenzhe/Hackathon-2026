@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from ai_extractor import _call_deepseek
 
+<<<<<<< HEAD
 def xp_for_level(level):
     """XP needed to go from `level` to `level+1`."""
     return int(100 * (level ** 1.5))
@@ -44,6 +45,8 @@ def check_level_up(conn, user_id):
         "new_level": level,
     }
 
+=======
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
 # ── Friend helpers ──
 
 def are_friends(conn, user_a, user_b):
@@ -201,11 +204,17 @@ def generate_quests(conn, user_id):
             "  ]\n"
             "}\n\n"
             "Rules:\n"
+<<<<<<< HEAD
             "- Each quest id must be unique (q_0, q_1, q_2, ...)\n"
             "- Categories: skill_gap (learn a missing skill), profile_completion (add CV sections), "
             "career_advancement (level up strategy), certification (earn a cert), social (network)\n"
             "- Max 5 quests\n"
             "- Make quests feel like RPG quests but grounded in real career actions",
+=======
+            "- Categories: skill_gap (learn a missing skill), profile_completion (add CV sections), "
+            "career_advancement (level up strategy), certification (earn a cert), social (network)\n"
+            "- Max 5 quests\n"
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
         )
     except Exception:
         result = None
@@ -229,7 +238,10 @@ def generate_quests(conn, user_id):
             "priority": prio,
             "title": (q.get("title") or f"Quest {i}")[:60],
             "description": (q.get("description") or "Complete this quest to advance your career.")[:300],
+<<<<<<< HEAD
             "xp_reward": max(30, min(150, int(q.get("xp_reward", 50)))),
+=======
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
             "status": "active",
             "proof": "",
             "proof_url": "",
@@ -331,7 +343,10 @@ def complete_quest(conn, user_id, quest_id, proof, proof_url="", proof_file=""):
     if not proof.strip():
         return False, "Proof of work required", 0
 
+<<<<<<< HEAD
     xp_gain = found.get("xp_reward", 50)
+=======
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
     msg = "Quest completed!"
 
     # Validate proof via DeepSeek
@@ -341,8 +356,12 @@ def complete_quest(conn, user_id, quest_id, proof, proof_url="", proof_file=""):
         if score >= 6:
             pass  # full XP
         elif score >= 3:
+<<<<<<< HEAD
             xp_gain = max(1, xp_gain // 2)
             msg = f"Quest completed at half XP — {validation.get('reason', 'proof could be stronger')}"
+=======
+            msg = f"Quest completed partially — {validation.get('reason', 'proof could be stronger')}"
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
         else:
             return False, f"Proof rejected: {validation.get('reason', 'Insufficient effort. Please provide more detail.')}", 0
 
@@ -354,8 +373,16 @@ def complete_quest(conn, user_id, quest_id, proof, proof_url="", proof_file=""):
 
     conn.execute(
         "UPDATE player_profiles SET quests = ?, xp = xp + ? WHERE user_id = ?",
+<<<<<<< HEAD
         (json.dumps(quests), xp_gain, user_id),
     )
     conn.commit()
 
     return True, msg, xp_gain
+=======
+        (json.dumps(quests) , user_id),
+    )
+    conn.commit()
+
+    return True, msg
+>>>>>>> 710af19ae02d28a48500c572b4a9ce4c5c947428
