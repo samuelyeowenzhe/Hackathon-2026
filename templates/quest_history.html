@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard">
+
+  <h2 class="page-title">Skills Log</h2>
+
+  <div class="section-card">
+    <h3 class="section-title">Verified Skills ({{ completed|length }})</h3>
+    {% if completed %}
+    <div class="quests-list">
+      {% for q in completed %}
+      <div class="quest-card quest-done">
+        <div class="quest-header">
+          <span class="quest-icon">{{ {'skill_gap':'💡','profile_completion':'💼','career_advancement':'🧭','certification':'📜','social':'🤝'}.get(q.category,'📋') }}</span>
+          <span class="quest-title">{{ q.title }}</span>
+          <span class="quest-prio prio-{{ q.priority }}">{{ q.priority | upper }}</span>
+        </div>
+        <p class="quest-desc">{{ q.description }}</p>
+        <div class="quest-completed">
+          ✓ {{ q.proof[:120] }}
+          {% if q.proof_url %}<a href="{{ q.proof_url }}" target="_blank">🔗 View</a>{% endif %}
+          {% if q.proof_file %}<a href="/uploads/quest_proofs/{{ q.proof_file }}" target="_blank">📎</a>{% endif %}
+        </div>
+        {% if q.completed_at %}<div class="quest-date">{{ q.completed_at[:10] }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No verified skills yet. Complete skills from your dashboard to build your record.</p>
+    {% endif %}
+  </div>
+
+  <div class="section-card">
+    <h3 class="section-title">In Progress ({{ active|length }})</h3>
+    {% if active %}
+    <div class="quests-list">
+      {% for q in active %}
+      <div class="quest-card">
+        <div class="quest-header">
+          <span class="quest-icon">{{ {'skill_gap':'💡','profile_completion':'💼','career_advancement':'🧭','certification':'📜','social':'🤝'}.get(q.category,'📋') }}</span>
+          <span class="quest-title">{{ q.title }}</span>
+          <span class="quest-prio prio-{{ q.priority }}">{{ q.priority | upper }}</span>
+        </div>
+        <p class="quest-desc">{{ q.description }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No active skills. Refresh your roadmap from the dashboard.</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

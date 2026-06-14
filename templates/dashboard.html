@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard">
+
+  <!-- Profile Card -->
+  <div class="player-card pixel-border">
+    <div class="avatar-pixel">
+      {% if avatar.startswith('custom:') %}
+      <img src="/uploads/avatars/{{ avatar.replace('custom:', '') }}" alt="avatar" class="avatar-custom">
+      {% else %}
+      <div class="avatar-emoji">{{ avatar }}</div>
+      {% endif %}
+    </div>
+    <div class="player-info">
+      <h2 class="player-name">{{ username }}</h2>
+      <p class="player-title">{{ profile.title or 'Career Profile' }}</p>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="quick-stats pixel-border">
+    <div class="stat-box">
+      <span class="stat-icon">📅</span>
+      <span class="stat-num">{{ events|length }}</span>
+      <span class="stat-desc">Events</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-icon">✅</span>
+      <span class="stat-num">{{ quests | selectattr('status', 'equalto', 'completed') | list | length }}</span>
+      <span class="stat-desc">Completed</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-icon">🤝</span>
+      <a href="{{ url_for('friends_page') }}">
+        <span class="stat-num">{{ friend_count }}</span>
+        <span class="stat-desc">Connections</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Connection Requests -->
+  {% if incoming_requests %}
+  <div class="section-card pixel-border">
+    <h3 class="section-title">Incoming Connection Requests</h3>
+    {% for r in incoming_requests %}
+    <div class="friend-request-row">
+      <span class="req-user">{{ r.username }}</span>
+      <span class="req-detail">{{ r.char_class }}</span>
+      <div class="req-actions">
+        <form method="POST" action="{{ url_for('friend_accept', request_id=r.id) }}" style="display:inline">
+          <button class="pixel-btn btn-small">Accept</button>
+        </form>
+        <form method="POST" action="{{ url_for('friend_reject', request_id=r.id) }}" style="display:inline">
+          <button class="pixel-btn btn-small btn-danger">Decline</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+    <a href="{{ url_for('friends_page') }}" class="view-all">View all connections →</a>
+  </div>
+  {% endif %}
+
+  <!-- Skills to Learn -->
+  {% if quests %}
+  <div class="section-card pixel-border">
+    <h3 class="section-title">
+      Skills to Learn
+      <form method="POST" action="{{ url_for('quest_refresh') }}" style="display:inline" onsubmit="return confirm('Regenerate your skill roadmap based on your target role?')">
+        <button class="pixel-btn btn-small" style="margin-left:12px;">🔄 Refresh</button>
+      </form>
+    </h3>
+    <div class="quests-list">
+      {% for q in quests %}
+      <div class="quest-card pixel-border {% if q.status == 'completed' %}quest-done{% endif %}" id="quest-{{ q.id }}">
+        <div class="quest-header">
+          <span class="quest-icon">{{ {'skill_gap':'💡','profile_completion':'💼','career_advancement':'🧭','certification':'📜','social':'🤝'}.get(q.category,'📋') }}</span>
+          <span class="quest-title">{{ q.title }}</span>
+          <span class="quest-prio prio-{{ q.priority }}">{{ q.priority | upper }}</span>
+        </div>
+        <p class="quest-desc">{{ q.description }}</p>
+        {% if q.status == 'completed' %}
+        <div class="quest-completed">
+          ✓ Verified — {{ q.proof[:80] }}
+          {% if q.proof_url %}<a href="{{ q.proof_url }}" target="_blank">🔗 View</a>{% endif %}
+          {% if q.proof_file %}<a href="/uploads/quest_proofs/{{ q.proof_file }}" target="_blank">📎</a>{% endif %}
+        </div>
+        {% else %}
+        <button class="pixel-btn btn-small quest-complete-btn" data-quest-id="{{ q.id }}">Mark as Complete</button>
+        <form class="quest-proof-form" id="proof-form-{{ q.id }}" style="display:none">
+          <textarea name="proof" class="pixel-textarea" rows="2" placeholder="Describe what you did and how..." required></textarea>
+          <input type="url" name="proof_url" class="pixel-input" placeholder="Link to proof (GitHub, certificate URL...)">
+          <input type="file" name="proof_file" accept=".pdf,.png,.jpg,.jpeg" class="pixel-input">
+          <button type="submit" class="pixel-btn btn-small">Submit Proof</button>
+          <div class="proof-status" id="pstatus-{{ q.id }}"></div>
+        </form>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Industry Events -->
+  <div class="events-section">
+    <h3 class="section-title">Industry Events</h3>
+    {% if events %}
+    <div class="events-grid">
+      {% for e in events %}
+      <div class="event-card pixel-border">
+        <h4>{{ e.title }}</h4>
+        <p class="event-desc">{{ e.description }}</p>
+        <div class="event-meta">
+          <span>{{ e.boss_name }}</span>
+        </div>
+        <button class="pixel-btn btn-small">View Event</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No events yet. Upload your CV to get started.</p>
+    {% endif %}
+  </div>
+
+  <!-- Upload CV -->
+  <div class="cv-section pixel-border">
+    <h3 class="section-title">Upload Certificate or CV</h3>
+    <p class="cv-hint">Upload a PDF to extract your skills and build your talent profile automatically.</p>
+    <form id="cv-upload-form" enctype="multipart/form-data">
+      <input type="file" name="cv_file" accept=".pdf" class="pixel-input" id="cv-input" required>
+      <button type="submit" class="pixel-btn">Upload & Analyse</button>
+    </form>
+    <div id="cv-status"></div>
+  </div>
+
+  <!-- AI Text Import -->
+  <div class="cv-section pixel-border">
+    <h3 class="section-title">Add Experience via AI</h3>
+    <p class="cv-hint">Paste a project description, GitHub README, certification details, or work experience. Our AI extracts and verifies your skills automatically.</p>
+    <form id="ai-entry-form">
+      <textarea name="text" class="pixel-textarea" rows="4" placeholder="Paste your experience, project description, or certification details here..." required></textarea>
+      <textarea name="proof" class="pixel-textarea" rows="2" placeholder="Proof of work — GitHub URL, certificate name, portfolio link..." required></textarea>
+      <input type="file" name="proof_file" accept=".pdf,.png,.jpg,.jpeg" class="pixel-input">
+      <button type="submit" class="pixel-btn">Analyse with AI</button>
+    </form>
+    <div id="ai-entry-status"></div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('cv-upload-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = new FormData(this);
+  const status = document.getElementById('cv-status');
+  status.innerHTML = '<span class="status-pending">Analysing your CV...</span>';
+  document.querySelector('#cv-upload-form .pixel-btn').disabled = true;
+  try {
+    const resp = await fetch('/cv/upload', { method: 'POST', body: form });
+    const data = await resp.json();
+    if (data.error) {
+      status.innerHTML = '<span class="status-error">' + data.error + '</span>';
+    } else {
+      let msg = '✓ Extracted ' + data.skills.length + ' skills from your profile.';
+      status.innerHTML = '<span class="status-success">' + msg + '</span>';
+      setTimeout(() => location.reload(), 2500);
+    }
+  } catch(err) {
+    status.innerHTML = '<span class="status-error">' + err.message + '</span>';
+  }
+  document.querySelector('#cv-upload-form .pixel-btn').disabled = false;
+});
+
+document.getElementById('ai-entry-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = new FormData(this);
+  const status = document.getElementById('ai-entry-status');
+  status.innerHTML = '<span class="status-pending">Classifying your experience...</span>';
+  document.querySelector('#ai-entry-form .pixel-btn').disabled = true;
+  try {
+    const resp = await fetch('/cv/add-entry', { method: 'POST', body: form });
+    const data = await resp.json();
+    if (data.error) {
+      status.innerHTML = '<span class="status-error">' + data.error + '</span>';
+    } else {
+      const type = data.section_type.replace(/_/g, ' ');
+      let msg = '✓ Added as <strong>' + type + '</strong>. Skills detected: ' + data.skills.join(', ') + '.';
+      status.innerHTML = '<span class="status-success">' + msg + '</span>';
+      setTimeout(() => location.reload(), 2500);
+    }
+  } catch(err) {
+    status.innerHTML = '<span class="status-error">' + err.message + '</span>';
+  }
+  document.querySelector('#ai-entry-form .pixel-btn').disabled = false;
+});
+
+document.querySelectorAll('.quest-complete-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const id = this.dataset.questId;
+    this.style.display = 'none';
+    document.getElementById('proof-form-' + id).style.display = 'flex';
+  });
+});
+
+document.querySelectorAll('.quest-proof-form').forEach(form => {
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const qid = this.id.replace('proof-form-', '');
+    const formData = new FormData(this);
+    const status = document.getElementById('pstatus-' + qid);
+    status.innerHTML = '<span class="status-pending">Submitting...</span>';
+    try {
+      const resp = await fetch('/quest/complete/' + qid, { method: 'POST', body: formData });
+      const data = await resp.json();
+      if (data.success) {
+        status.innerHTML = '<span class="status-success">Skill verified!</span>';
+        setTimeout(() => location.reload(), 2000);
+      } else {
+        status.innerHTML = '<span class="status-error">' + (data.error || 'Submission failed') + '</span>';
+      }
+    } catch(err) {
+      status.innerHTML = '<span class="status-error">' + err.message + '</span>';
+    }
+  });
+});
+</script>
+{% endblock %}
+
+

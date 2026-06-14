@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard">
+
+  <h2 class="page-title">All Candidates</h2>
+
+  <div class="players-grid">
+    {% for p in players %}
+    <div class="player-mini">
+      <div class="mini-avatar mini-avatar-emoji">{{ p.avatar or '🧑' }}</div>
+      <div class="mini-info">
+        <a href="{{ url_for('profile', username=p.username) }}"><strong>{{ p.username }}</strong></a>
+        <span class="mini-level">{{ p.title or 'Candidate' }}</span>
+      </div>
+      <div class="mini-action">
+        {% if p.id not in friend_ids %}
+        <button class="pixel-btn btn-small" onclick="sendFriend({{ p.id }})">+ Connect</button>
+        {% else %}
+        <span class="connected-badge">Connected ✓</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+<script>
+async function sendFriend(userId) {
+  const resp = await fetch('/friend/send/' + userId, { method: 'POST' });
+  const data = await resp.json();
+  if (data.success) { location.reload(); }
+  else { alert(data.message); }
+}
+</script>
+{% endblock %}
